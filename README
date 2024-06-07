@@ -1,11 +1,37 @@
-How to use:
+Flask App Dockerized
+Description
+This repository contains a Flask web application that serves a machine learning model for making predictions. The Flask app is Dockerized, making it easy to deploy and run in any environment.
 
-cd dir
+How to Use
+Clone Repository:
 
+bash
+Copy code
+git clone <repository-url>
+Navigate to Project Directory:
+
+bash
+Copy code
+cd <project-directory>
+Build Docker Image:
+
+bash
+Copy code
 sudo docker build -t flask-app .
+Run Docker Container:
 
+bash
+Copy code
 docker run -p 5000:5000 flask-app
+Test the Application:
+Use curl to send a sample POST request to the Flask app:
 
-e.g. test
-curl -X POST http://localhost:5000/predict -H "Content-Type: application/json" -d '{"data": : application/json" -d '{"data": [[8.3252, 41, 6.984127, 1.02381, 322, 2.555556, 37.88, -122.23], [8.3014, 21, 6.238137, 1.072314,' 240, 2.109842, 37.86, -122.22]]}'
+bash
+Copy code
+curl -X POST http://localhost:5000/predict \
+-H "Content-Type: application/json" \
+-d '{"data": [[8.3252, 41, 6.984127, 1.02381, 322, 2.555556, 37.88, -122.23], [8.3014, 21, 6.238137, 1.072314, 240, 2.109842, 37.86, -122.22]]}'
+This command sends a JSON payload containing sample data to the /predict endpoint of the Flask app running on port 5000. Adjust the data as needed for your use case.
 
+License
+This project is licensed under the MIT License - see the LICENSE file for details.
