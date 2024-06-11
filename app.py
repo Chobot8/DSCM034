@@ -1,8 +1,13 @@
 import joblib
 import numpy as np
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List
 
-app = Flask(__name__)
+app = FastAPI()
+
+class PredictRequest(BaseModel):
+    data: List[List[float]]
 
 # Load the model
 def load_model():
@@ -13,36 +18,17 @@ def load_model():
 
 model = load_model()
 
-# Prediction function
-def predict(data):
+@app.post("/predict")
+def predict(request: PredictRequest):
+    data = np.array(request.data)
+    if data.ndim != 2 or data.shape[1] != 8:  # Assuming the model expects 8 features
+        raise HTTPException(status_code=400, detail="Input data must be a 2D array with shape (n_samples, 8)")
     try:
-        data = np.array(data)
-        if data.ndim != 2 or data.shape[1] != 8:  # California housing dataset has 8 features
-            raise ValueError("Input data must be a 2D array with shape (n_samples, 8)")
         predictions = model.predict(data)
-        return predictions
+        return {"predictions": predictions.tolist()}
     except Exception as e:
-        raise ValueError(f"Prediction error: {str(e)}")
-
-@app.route('/predict', methods=['POST'])
-def predict_endpoint():
-    if not request.is_json:
-        return jsonify({'error': 'Request must be in JSON format'}), 400
-    
-    try:
-        data = request.json.get('data')
-        if data is None:
-            raise ValueError("No data provided in request")
-        
-        predictions = predict(data)
-        return jsonify({'predictions': predictions.tolist()})
-    
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    
-    except Exception as e:
-        return jsonify({'error': f"An unexpected error occurred: {str(e)}"}), 500
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=5000)
